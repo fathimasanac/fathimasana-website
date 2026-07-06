@@ -664,15 +664,9 @@ img {
   text-transform: lowercase;
 }
 
+/* Subheading underlines removed per design request */
 .section-title-pop::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 40px;
-  height: 3px;
-  background-color: var(--color-slate-blue);
-  border-radius: var(--radius-sm);
+  display: none;
 }
 
 .section-subtitle {
