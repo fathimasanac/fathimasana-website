@@ -185,55 +185,156 @@ document.addEventListener('DOMContentLoaded', () => {
   const contactForm = document.getElementById('portfolio-contact-form');
   const submitBtn = document.getElementById('form-submit-btn');
   const successAlert = document.getElementById('form-success-alert');
+  const errorAlert = document.getElementById('form-error-alert');
 
   if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
+    contactForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
       // Select form fields
       const name = document.getElementById('form-name').value;
       const email = document.getElementById('form-email').value;
-      const subject = document.getElementById('form-subject').value;
+      const subjectSelect = document.getElementById('form-subject');
+      const subjectText = subjectSelect.options[subjectSelect.selectedIndex].text;
       const message = document.getElementById('form-message').value;
+
+      // Hide any previous alert messages
+      if (successAlert) successAlert.style.display = 'none';
+      if (errorAlert) errorAlert.style.display = 'none';
 
       // Show submitting state
       const originalBtnText = submitBtn.innerHTML;
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending Campaign Info...';
 
-      // Simulate API request (1.5 seconds delay)
-      setTimeout(() => {
-        // Success state
-        submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Sent successfully!';
-        
-        // Show success message
-        successAlert.style.display = 'flex';
-        successAlert.style.opacity = '0';
-        successAlert.style.transform = 'translateY(10px)';
-        successAlert.style.transition = 'all 0.4s ease';
-        
-        setTimeout(() => {
-          successAlert.style.opacity = '1';
-          successAlert.style.transform = 'translateY(0)';
-        }, 50);
+      // Check if config keys are configured
+      const hasWeb3Forms = typeof CONFIG !== 'undefined' && CONFIG.WEB3FORMS_ACCESS_KEY && CONFIG.WEB3FORMS_ACCESS_KEY !== 'YOUR_WEB3FORMS_ACCESS_KEY_HERE';
+      const hasFormspree = typeof CONFIG !== 'undefined' && CONFIG.FORMSPREE_FORM_ID && CONFIG.FORMSPREE_FORM_ID.trim() !== '';
 
-        // Reset form
-        contactForm.reset();
+      if (!hasWeb3Forms && !hasFormspree) {
+        // Form is not configured yet (developer/user needs to add their keys)
+        console.warn("Contact form submitted, but no email service keys are configured in config.js.");
+        
+        // Show error alert with setup guidance
+        if (errorAlert) {
+          errorAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Form setup required: Please configure your Web3Forms Access Key or Formspree Form ID in config.js.';
+          errorAlert.style.display = 'flex';
+        }
+        
+        // Restore button state
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+        return;
+      }
 
-        // Restore button state after 3 seconds
-        setTimeout(() => {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalBtnText;
+      try {
+        let response;
+        let success = false;
+
+        if (hasWeb3Forms) {
+          // Send to Web3Forms API
+          response = await fetch("https://api.web3forms.com/submit", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json"
+            },
+            body: JSON.stringify({
+              access_key: CONFIG.WEB3FORMS_ACCESS_KEY,
+              name: name,
+              email: email,
+              subject: `Portfolio Contact: ${subjectText}`,
+              message: message,
+              from_name: "Fathima Sana Portfolio"
+            })
+          });
+          const data = await response.json();
+          success = data.success;
+        } else if (hasFormspree) {
+          // Send to Formspree API
+          response = await fetch(`https://formspree.io/f/${CONFIG.FORMSPREE_FORM_ID}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json"
+            },
+            body: JSON.stringify({
+              name: name,
+              email: email,
+              subject: `Portfolio Contact: ${subjectText}`,
+              message: message
+            })
+          });
+          success = response.ok;
+        }
+
+        if (success) {
+          // Success state
+          submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Sent successfully!';
           
-          // Fade out success alert
-          successAlert.style.opacity = '0';
-          successAlert.style.transform = 'translateY(10px)';
+          // Show success message
+          if (successAlert) {
+            successAlert.style.display = 'flex';
+            successAlert.style.opacity = '0';
+            successAlert.style.transform = 'translateY(10px)';
+            successAlert.style.transition = 'all 0.4s ease';
+            
+            setTimeout(() => {
+              successAlert.style.opacity = '1';
+              successAlert.style.transform = 'translateY(0)';
+            }, 50);
+          }
+
+          // Reset form
+          contactForm.reset();
+
+          // Restore button state after 4 seconds
           setTimeout(() => {
-            successAlert.style.display = 'none';
-          }, 400);
-        }, 4000);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+            
+            // Fade out success alert
+            if (successAlert) {
+              successAlert.style.opacity = '0';
+              successAlert.style.transform = 'translateY(10px)';
+              setTimeout(() => {
+                successAlert.style.display = 'none';
+              }, 400);
+            }
+          }, 4000);
+
+        } else {
+          throw new Error("API responded with an error status.");
+        }
+      } catch (err) {
+        console.error("Error submitting contact form:", err);
         
-      }, 1500);
+        // Error state
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+
+        if (errorAlert) {
+          errorAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Failed to send. Please check your network or try again later.';
+          errorAlert.style.display = 'flex';
+          errorAlert.style.opacity = '0';
+          errorAlert.style.transform = 'translateY(10px)';
+          errorAlert.style.transition = 'all 0.4s ease';
+          
+          setTimeout(() => {
+            errorAlert.style.opacity = '1';
+            errorAlert.style.transform = 'translateY(0)';
+          }, 50);
+          
+          // Hide error alert after 5 seconds
+          setTimeout(() => {
+            errorAlert.style.opacity = '0';
+            errorAlert.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+              errorAlert.style.display = 'none';
+            }, 400);
+          }, 5000);
+        }
+      }
     });
   }
 
@@ -269,11 +370,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let dotX = -100;
     let dotY = -100;
     let isVisible = false;
+    let lastClientX = 0;
+    let lastClientY = 0;
 
     // Track mouse coordinates
     window.addEventListener('mousemove', (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
+      lastClientX = e.clientX;
+      lastClientY = e.clientY;
+      mouseX = e.pageX;
+      mouseY = e.pageY;
 
       if (!isVisible) {
         // First movement within viewport
@@ -285,6 +390,14 @@ document.addEventListener('DOMContentLoaded', () => {
         ringY = dotY = mouseY;
         
         isVisible = true;
+      }
+    });
+
+    // Update coordinates when scrolling to keep stationary mouse aligned
+    window.addEventListener('scroll', () => {
+      if (isVisible) {
+        mouseX = lastClientX + window.scrollX;
+        mouseY = lastClientY + window.scrollY;
       }
     });
 
@@ -359,8 +472,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Show custom cursor when mouse returns to window bounds
     document.addEventListener('mouseenter', (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
+      lastClientX = e.clientX;
+      lastClientY = e.clientY;
+      mouseX = e.pageX;
+      mouseY = e.pageY;
       cursorRing.style.opacity = '1';
       cursorDot.style.opacity = '1';
       isVisible = true;
