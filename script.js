@@ -207,66 +207,39 @@ document.addEventListener('DOMContentLoaded', () => {
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending Campaign Info...';
 
-      // Check if config keys are configured
-      const hasWeb3Forms = typeof CONFIG !== 'undefined' && CONFIG.WEB3FORMS_ACCESS_KEY && CONFIG.WEB3FORMS_ACCESS_KEY !== 'YOUR_WEB3FORMS_ACCESS_KEY_HERE';
-      const hasFormspree = typeof CONFIG !== 'undefined' && CONFIG.FORMSPREE_FORM_ID && CONFIG.FORMSPREE_FORM_ID.trim() !== '';
+      // Check if email is configured
+      const hasEmail = typeof CONFIG !== 'undefined' && CONFIG.RECEIVING_EMAIL && CONFIG.RECEIVING_EMAIL.trim() !== '';
 
-      if (!hasWeb3Forms && !hasFormspree) {
-        // Form is not configured yet (developer/user needs to add their keys)
-        console.warn("Contact form submitted, but no email service keys are configured in config.js.");
-        
-        // Show error alert with setup guidance
+      if (!hasEmail) {
+        console.warn("Contact form submitted, but no receiving email is configured in config.js.");
         if (errorAlert) {
-          errorAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Form setup required: Please configure your Web3Forms Access Key or Formspree Form ID in config.js.';
+          errorAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Form setup required: Please configure your email in config.js.';
           errorAlert.style.display = 'flex';
         }
-        
-        // Restore button state
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;
         return;
       }
 
       try {
-        let response;
-        let success = false;
+        // Send to FormSubmit AJAX API
+        const response = await fetch(`https://formsubmit.co/ajax/${CONFIG.RECEIVING_EMAIL}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json"
+          },
+          body: JSON.stringify({
+            name: name,
+            email: email,
+            subject: `Portfolio Contact: ${subjectText}`,
+            message: message,
+            _subject: `New Portfolio Message from ${name}` // Custom subject for FormSubmit
+          })
+        });
 
-        if (hasWeb3Forms) {
-          // Send to Web3Forms API
-          response = await fetch("https://api.web3forms.com/submit", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json"
-            },
-            body: JSON.stringify({
-              access_key: CONFIG.WEB3FORMS_ACCESS_KEY,
-              name: name,
-              email: email,
-              subject: `Portfolio Contact: ${subjectText}`,
-              message: message,
-              from_name: "Fathima Sana Portfolio"
-            })
-          });
-          const data = await response.json();
-          success = data.success;
-        } else if (hasFormspree) {
-          // Send to Formspree API
-          response = await fetch(`https://formspree.io/f/${CONFIG.FORMSPREE_FORM_ID}`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json"
-            },
-            body: JSON.stringify({
-              name: name,
-              email: email,
-              subject: `Portfolio Contact: ${subjectText}`,
-              message: message
-            })
-          });
-          success = response.ok;
-        }
+        const data = await response.json();
+        const success = response.ok || data.success === "true" || data.success === true;
 
         if (success) {
           // Success state
@@ -274,6 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
           
           // Show success message
           if (successAlert) {
+            successAlert.innerHTML = '<i class="fa-solid fa-circle-check"></i> Thank you! I will get back to you shortly.';
             successAlert.style.display = 'flex';
             successAlert.style.opacity = '0';
             successAlert.style.transform = 'translateY(10px)';
@@ -304,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }, 4000);
 
         } else {
-          throw new Error("API responded with an error status.");
+          throw new Error("FormSubmit API responded with an error status.");
         }
       } catch (err) {
         console.error("Error submitting contact form:", err);
