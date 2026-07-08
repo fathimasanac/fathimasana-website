@@ -23,21 +23,40 @@ document.addEventListener('DOMContentLoaded', () => {
   // Close mobile menu when a link is clicked
   navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
-      // Prevent default navigation to avoid race conditions with DOM class toggle
-      e.preventDefault();
       const targetId = link.getAttribute('href');
-      const targetSection = document.querySelector(targetId);
       
-      // Close the menu first
-      navLinksContainer.classList.remove('active');
-      const icon = mobileMenuBtn.querySelector('i');
-      if (icon) {
-        icon.className = 'fa-solid fa-bars-staggered';
-      }
-      
-      // Scroll to the target section smoothly
-      if (targetSection) {
-        targetSection.scrollIntoView({ behavior: 'smooth' });
+      // Only handle smooth scroll for local hash anchors
+      if (targetId && targetId.startsWith('#')) {
+        // Prevent default navigation to avoid race conditions with DOM class toggle
+        e.preventDefault();
+        const targetSection = document.querySelector(targetId);
+        
+        // Close the menu first
+        if (navLinksContainer) {
+          navLinksContainer.classList.remove('active');
+        }
+        if (mobileMenuBtn) {
+          const icon = mobileMenuBtn.querySelector('i');
+          if (icon) {
+            icon.className = 'fa-solid fa-bars-staggered';
+          }
+        }
+        
+        // Scroll to the target section smoothly
+        if (targetSection) {
+          targetSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        // For standard page links (like blog/index.html), close the mobile menu first and let default navigation occur
+        if (navLinksContainer) {
+          navLinksContainer.classList.remove('active');
+        }
+        if (mobileMenuBtn) {
+          const icon = mobileMenuBtn.querySelector('i');
+          if (icon) {
+            icon.className = 'fa-solid fa-bars-staggered';
+          }
+        }
       }
     });
   });
