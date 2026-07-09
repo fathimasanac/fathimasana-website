@@ -8,151 +8,175 @@
     <meta name="description"
         content="Digital marketing insights, Meta Ads strategies, and lead generation tips from Fathima Sana C.">
     <link rel="icon" type="image/png" href="../logo.png">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://www.iamsana.com/blog">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.iamsana.com/blog">
+    <meta property="og:title" content="Blog | Fathima Sana C - Digital Marketing Insights">
+    <meta property="og:description" content="Digital marketing insights, Meta Ads strategies, and lead generation tips from Fathima Sana C.">
+    <meta property="og:image" content="https://www.iamsana.com/logo.png">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://www.iamsana.com/blog">
+    <meta name="twitter:title" content="Blog | Fathima Sana C - Digital Marketing Insights">
+    <meta name="twitter:description" content="Digital marketing insights, Meta Ads strategies, and lead generation tips from Fathima Sana C.">
+    <meta name="twitter:image" content="https://www.iamsana.com/logo.png">
+
+    <!-- Google Fonts: Outfit for display headings, Plus Jakarta Sans for readable body -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="../style.css">
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            color: #2a2a2a;
-            background: #faf7f2;
-        }
-
-        h1,
-        h2,
-        h3 {
-            font-family: 'Outfit', sans-serif;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 60px;
-            background: #faf7f2;
-            border-bottom: 1px solid #eee;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-            color: #c1502e;
-            font-size: 20px;
-            text-decoration: none;
-        }
-
-        .logo img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-        }
-
-        nav a {
-            margin-left: 30px;
-            text-decoration: none;
-            color: #2a2a2a;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .container {
+        /* Blog specific design system mappings */
+        .blog-container {
             max-width: 900px;
             margin: 0 auto;
-            padding: 60px 20px;
+            padding: 160px 24px 80px; /* Space for fixed header */
+            position: relative;
+            z-index: 1;
         }
 
         .page-title {
-            font-size: 42px;
-            margin-bottom: 10px;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: var(--color-dark);
+            text-transform: lowercase;
+            font-family: var(--font-pop);
         }
 
         .page-subtitle {
-            color: #666;
+            color: var(--color-slate-medium);
             margin-bottom: 50px;
-            font-size: 16px;
+            font-size: 1.1rem;
+            font-family: var(--font-body);
         }
 
         .post-card {
-            background: #fff;
-            border-radius: 12px;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
             padding: 30px;
             margin-bottom: 25px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s;
+            box-shadow: var(--shadow-soft-purple);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .post-card:hover {
             transform: translateY(-3px);
+            box-shadow: var(--shadow-hover-purple);
         }
 
         .post-tag {
             display: inline-block;
-            background: #f6e2d8;
-            color: #c1502e;
-            font-size: 12px;
-            font-weight: 600;
+            background-color: rgba(200, 90, 50, 0.08);
+            color: var(--color-terracotta);
+            font-size: 0.75rem;
+            font-weight: 700;
             padding: 4px 12px;
-            border-radius: 20px;
+            border-radius: var(--radius-sm);
             margin-bottom: 12px;
+            border: 1px solid rgba(200, 90, 50, 0.15);
+            text-transform: uppercase;
+            font-family: var(--font-pop);
         }
 
         .post-card h2 {
-            font-size: 24px;
+            font-size: 1.6rem;
             margin-bottom: 10px;
+            font-family: var(--font-pop);
+            text-transform: lowercase;
         }
 
-        .post-card a {
+        .post-card h2 a {
             text-decoration: none;
-            color: #2a2a2a;
+            color: var(--color-dark);
+            transition: color 0.3s;
+        }
+
+        .post-card h2 a:hover {
+            color: var(--color-terracotta);
         }
 
         .post-meta {
-            color: #999;
-            font-size: 13px;
+            color: var(--color-slate-medium);
+            font-size: 0.85rem;
             margin-bottom: 15px;
+            opacity: 0.8;
+            font-family: var(--font-body);
         }
 
         .post-excerpt {
-            color: #555;
+            color: var(--color-slate-medium);
             line-height: 1.6;
+            margin-bottom: 15px;
         }
 
         .read-more {
-            color: #c1502e;
-            font-weight: 600;
-            font-size: 14px;
-            margin-top: 15px;
-            display: inline-block;
+            color: var(--color-terracotta);
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            font-family: var(--font-pop);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: gap 0.3s;
+        }
+        
+        .read-more:hover {
+            gap: 10px;
         }
     </style>
 </head>
 
 <body>
 
-    <header>
-        <a href="../index.html" class="logo">
-            <img src="../logo.png" alt="Fathima Sana logo">
-            fathima sana.
-        </a>
-        <nav>
-            <a href="../index.html#about">About</a>
-            <a href="../index.html#services">Services</a>
-            <a href="how-i-scaled-roas.html">Blog</a>
-            <a href="../index.html#contact">Let's Connect</a>
+    <!-- Abstract Background Grid Elements -->
+    <div class="bg-grid-container">
+        <div class="bg-grid-line line-horizontal"></div>
+        <div class="bg-grid-line line-vertical"></div>
+    </div>
+
+    <!-- Floating Navigation -->
+    <header class="navbar-container">
+        <nav class="navbar" id="navbar">
+            <div class="logo">
+                <a href="../" class="logo-link">
+                    <img src="../logo.png" alt="Fathima Sana C. - Digital Marketer & Meta Ads Specialist Logo" class="navbar-logo">
+                    <span class="signature-logo">Fathima Sana.</span>
+                </a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="../#about" class="nav-link">About</a></li>
+                <li><a href="../#services" class="nav-link">Services</a></li>
+                <li><a href="../#experience" class="nav-link">Experience</a></li>
+                <li><a href="../#skills" class="nav-link">Skills</a></li>
+                <li><a href="./" class="nav-link active">Blog</a></li>
+                <li><a href="../#contact" class="nav-link nav-btn">Let's Connect</a></li>
+            </ul>
+            <div class="menu-toggle" id="mobile-menu-btn">
+                <i class="fa-solid fa-bars-staggered"></i>
+            </div>
         </nav>
     </header>
 
-    <div class="container">
+    <div class="blog-container">
         <h1 class="page-title">Blog</h1>
         <p class="page-subtitle">Thoughts on Meta Ads, digital marketing strategy, and growing brands online.</p>
 
@@ -162,11 +186,48 @@
             <p class="post-meta">July 2026 · 5 min read</p>
             <p class="post-excerpt">A behind-the-scenes look at the exact retargeting and audience segmentation strategy
                 that took a struggling ad account from break-even to an 80x return on ad spend.</p>
-            <a href="how-i-scaled-roas.html" class="read-more">Read the full story →</a>
+            <a href="how-i-scaled-roas.html" class="read-more">Read the full story <i class="fa-solid fa-arrow-right"></i></a>
         </div>
-
     </div>
 
+    <!-- Unified Consistent Footer -->
+    <footer class="footer">
+        <div class="container footer-content text-center">
+            <div class="footer-logo-wrapper">
+                <img src="../logo.png" alt="Fathima Sana C. Brand Icon" class="footer-logo-img" loading="lazy">
+                <h2 class="footer-logo">Fathima Sana C.</h2>
+            </div>
+            <p class="footer-tagline">Scaling businesses with data-driven social &amp; paid campaigns</p>
+
+            <!-- Footer Internal Navigation Links for SEO Crawlability -->
+            <div class="footer-links">
+                <a href="../#about">About</a> •
+                <a href="../#services">Services</a> •
+                <a href="../#experience">Experience</a> •
+                <a href="../#skills">Skills</a> •
+                <a href="./">Blog</a> •
+                <a href="../#contact">Contact</a>
+            </div>
+            <div class="footer-socials">
+                <a href="https://linkedin.com/in/fathima-sana-c" target="_blank" rel="noopener noreferrer"
+                    class="social-circle"><i class="fa-brands fa-linkedin-in"></i></a>
+                <a href="https://wa.me/919946480615" target="_blank" rel="noopener noreferrer" class="social-circle"><i
+                        class="fa-brands fa-whatsapp"></i></a>
+                <a href="mailto:fathimasanac1@gmail.com" class="social-circle"><i class="fa-solid fa-envelope"></i></a>
+                <a href="tel:+919946480615" class="social-circle"><i class="fa-solid fa-phone"></i></a>
+            </div>
+            <div class="footer-credits">
+                <p>© 2026 Fathima Sana C. Designed with pop abstract gradient style.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Custom Cursor Elements -->
+    <div class="custom-cursor-ring" id="custom-cursor-ring"></div>
+    <div class="custom-cursor-dot" id="custom-cursor-dot"></div>
+
+    <script src="../config.js" defer></script>
+    <script src="../script.js" defer></script>
 </body>
 
 </html>

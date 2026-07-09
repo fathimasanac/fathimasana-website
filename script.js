@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (mobileMenuBtn) {
     mobileMenuBtn.addEventListener('click', () => {
       navLinksContainer.classList.toggle('active');
-      
+
       // Toggle menu icon
       const icon = mobileMenuBtn.querySelector('i');
       if (navLinksContainer.classList.contains('active')) {
@@ -24,39 +24,25 @@ document.addEventListener('DOMContentLoaded', () => {
   navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
       const targetId = link.getAttribute('href');
-      
-      // Only handle smooth scroll for local hash anchors
-      if (targetId && targetId.startsWith('#')) {
-        // Prevent default navigation to avoid race conditions with DOM class toggle
-        e.preventDefault();
-        const targetSection = document.querySelector(targetId);
-        
-        // Close the menu first
-        if (navLinksContainer) {
-          navLinksContainer.classList.remove('active');
-        }
-        if (mobileMenuBtn) {
-          const icon = mobileMenuBtn.querySelector('i');
-          if (icon) {
-            icon.className = 'fa-solid fa-bars-staggered';
-          }
-        }
-        
-        // Scroll to the target section smoothly
-        if (targetSection) {
-          targetSection.scrollIntoView({ behavior: 'smooth' });
-        }
-      } else {
-        // For standard page links (like blog/index.html), close the mobile menu first and let default navigation occur
-        if (navLinksContainer) {
-          navLinksContainer.classList.remove('active');
-        }
-        if (mobileMenuBtn) {
-          const icon = mobileMenuBtn.querySelector('i');
-          if (icon) {
-            icon.className = 'fa-solid fa-bars-staggered';
-          }
-        }
+
+      // Only intercept same-page anchor links (starting with #)
+      if (!targetId.startsWith('#')) {
+        return; // let the browser navigate normally
+      }
+
+      e.preventDefault();
+      const targetSection = document.querySelector(targetId);
+
+      // Close the menu first
+      navLinksContainer.classList.remove('active');
+      const icon = mobileMenuBtn.querySelector('i');
+      if (icon) {
+        icon.className = 'fa-solid fa-bars-staggered';
+      }
+
+      // Scroll to the target section smoothly
+      if (targetSection) {
+        targetSection.scrollIntoView({ behavior: 'smooth' });
       }
     });
   });
@@ -65,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // NAVBAR SCROLL EFFECT
   // ==========================================================================
   const navbarContainer = document.querySelector('.navbar-container');
-  
+
   const handleScroll = () => {
     if (window.scrollY > 50) {
       navbarContainer.classList.add('scrolled');
@@ -82,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ACTIVE NAVIGATION LINK TRACKING
   // ==========================================================================
   const sections = document.querySelectorAll('section[id], header[id]');
-  
+
   const activeLinkTracker = () => {
     const scrollPosition = window.scrollY + 120; // offset for nav bar
 
@@ -90,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const top = section.offsetTop;
       const height = section.offsetHeight;
       const id = section.getAttribute('id');
-      
+
       if (scrollPosition >= top && scrollPosition < top + height) {
         navLinks.forEach(link => {
           link.classList.remove('active');
@@ -114,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const countUp = (element, targetValue, duration = 2000, suffix = '') => {
     let start = 0;
     const increment = targetValue / (duration / 16); // ~60fps
-    
+
     const updateCount = () => {
       start += increment;
       if (start >= targetValue) {
@@ -124,14 +110,14 @@ document.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(updateCount);
       }
     };
-    
+
     updateCount();
   };
 
   const initCounters = () => {
     statVals.forEach(val => {
       const text = val.textContent.trim().toLowerCase();
-      
+
       // Determine targets and formats
       if (text.includes('8 to 200+')) {
         // Special case: Animate from 8 to 200
@@ -209,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (contactForm) {
     contactForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       // Select form fields
       const name = document.getElementById('form-name').value;
       const email = document.getElementById('form-email').value;
@@ -263,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (success) {
           // Success state
           submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Sent successfully!';
-          
+
           // Show success message
           if (successAlert) {
             successAlert.innerHTML = '<i class="fa-solid fa-circle-check"></i> Thank you! I will get back to you shortly.';
@@ -271,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
             successAlert.style.opacity = '0';
             successAlert.style.transform = 'translateY(10px)';
             successAlert.style.transition = 'all 0.4s ease';
-            
+
             setTimeout(() => {
               successAlert.style.opacity = '1';
               successAlert.style.transform = 'translateY(0)';
@@ -285,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
           setTimeout(() => {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalBtnText;
-            
+
             // Fade out success alert
             if (successAlert) {
               successAlert.style.opacity = '0';
@@ -301,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } catch (err) {
         console.error("Error submitting contact form:", err);
-        
+
         // Error state
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;
@@ -312,12 +298,12 @@ document.addEventListener('DOMContentLoaded', () => {
           errorAlert.style.opacity = '0';
           errorAlert.style.transform = 'translateY(10px)';
           errorAlert.style.transition = 'all 0.4s ease';
-          
+
           setTimeout(() => {
             errorAlert.style.opacity = '1';
             errorAlert.style.transform = 'translateY(0)';
           }, 50);
-          
+
           // Hide error alert after 5 seconds
           setTimeout(() => {
             errorAlert.style.opacity = '0';
@@ -354,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================================================
   const cursorRing = document.getElementById('custom-cursor-ring');
   const cursorDot = document.getElementById('custom-cursor-dot');
-  
+
   if (cursorRing && cursorDot) {
     let mouseX = -100;
     let mouseY = -100;
@@ -377,11 +363,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // First movement within viewport
         cursorRing.style.opacity = '1';
         cursorDot.style.opacity = '1';
-        
+
         // Initialize ring and dot position directly to avoid trailing from origin
         ringX = dotX = mouseX;
         ringY = dotY = mouseY;
-        
+
         isVisible = true;
       }
     });
@@ -409,10 +395,10 @@ document.addEventListener('DOMContentLoaded', () => {
         cursorRing.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
         cursorDot.style.transform = `translate3d(${dotX}px, ${dotY}px, 0) translate(-50%, -50%)`;
       }
-      
+
       requestAnimationFrame(renderCursor);
     };
-    
+
     // Start the animation loop
     requestAnimationFrame(renderCursor);
 
@@ -430,7 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
           cursorRing.style.opacity = '1';
           cursorDot.style.opacity = '1';
         }
-        
+
         if (hoverable) {
           cursorRing.classList.add('cursor-hover');
           cursorDot.classList.add('cursor-hover');
@@ -449,7 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
           cursorDot.style.opacity = '1';
         }
       }
-      
+
       if (hoverable) {
         cursorRing.classList.remove('cursor-hover');
         cursorDot.classList.remove('cursor-hover');
