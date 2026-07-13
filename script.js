@@ -251,12 +251,17 @@ document.addEventListener('DOMContentLoaded', () => {
           submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Sent successfully!';
           // Track successful contact form submission
           console.log("SUCCESS BLOCK EXECUTED");
+
           window.dataLayer = window.dataLayer || [];
+
+          console.log("Before push:", window.dataLayer);
 
           window.dataLayer.push({
             event: "generate_lead",
             form_name: "Portfolio Contact Form"
           });
+
+          console.log("After push:", window.dataLayer);
 
           // Show success message
           if (successAlert) {
