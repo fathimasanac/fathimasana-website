@@ -250,11 +250,13 @@ document.addEventListener('DOMContentLoaded', () => {
           // Success state
           submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Sent successfully!';
           // Track successful contact form submission
-          if (typeof gtag === "function") {
-            gtag("event", "generate_lead", {
-              form_name: "Portfolio Contact Form"
-            });
-          }
+          console.log("SUCCESS BLOCK EXECUTED");
+          window.dataLayer = window.dataLayer || [];
+
+          window.dataLayer.push({
+            event: "generate_lead",
+            form_name: "Portfolio Contact Form"
+          });
 
           // Show success message
           if (successAlert) {
