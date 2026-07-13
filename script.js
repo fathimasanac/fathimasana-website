@@ -249,6 +249,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (success) {
           // Success state
           submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Sent successfully!';
+          // Track successful contact form submission
+          if (typeof gtag === "function") {
+            gtag("event", "generate_lead", {
+              form_name: "Portfolio Contact Form"
+            });
+          }
 
           // Show success message
           if (successAlert) {
@@ -291,6 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Error state
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;
+
 
         if (errorAlert) {
           errorAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Failed to send. Please check your network or try again later.';
