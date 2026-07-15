@@ -533,23 +533,19 @@ document.addEventListener('DOMContentLoaded', () => {
       cursorDot.style.opacity = '1';
       isVisible = true;
     });
-    // ==========================================================================
-    // WHATSAPP CLICK TRACKING
-    // ==========================================================================
+  }
 
-    document.querySelectorAll(".track-whatsapp").forEach(link => {
+  // ==========================================================================
+  // WHATSAPP CLICK TRACKING
+  // ==========================================================================
 
-      link.addEventListener("click", () => {
-
-        window.dataLayer = window.dataLayer || [];
-
-        window.dataLayer.push({
-          event: "whatsapp_click"
-        });
-
-        console.log("WhatsApp Click Tracked");
-
+  document.querySelectorAll(".track-whatsapp").forEach(link => {
+    link.addEventListener("click", () => {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "whatsapp_click"
       });
-
+      console.log("WhatsApp Click Tracked");
     });
-
+  });
+});
