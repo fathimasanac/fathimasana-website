@@ -203,6 +203,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const subjectText = subjectSelect.options[subjectSelect.selectedIndex].text;
       const message = document.getElementById('form-message').value;
 
+      // Honeypot spam check
+      const honeyField = document.getElementById('form-honey');
+      const isSpam = honeyField && honeyField.value.trim() !== '';
+
       // Hide any previous alert messages
       if (successAlert) successAlert.style.display = 'none';
       if (errorAlert) errorAlert.style.display = 'none';
@@ -212,36 +216,90 @@ document.addEventListener('DOMContentLoaded', () => {
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending Campaign Info...';
 
-      // Check if email is configured
-      const hasEmail = typeof CONFIG !== 'undefined' && CONFIG.RECEIVING_EMAIL && CONFIG.RECEIVING_EMAIL.trim() !== '';
-
-      if (!hasEmail) {
-        console.warn("Contact form submitted, but no receiving email is configured in config.js.");
-        if (errorAlert) {
-          errorAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Form setup required: Please configure your email in config.js.';
-          errorAlert.style.display = 'flex';
-        }
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalBtnText;
+      // Handle spam bot silently to prevent them retrying
+      if (isSpam) {
+        console.warn("Spam detected via honeypot field.");
+        setTimeout(() => {
+          submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Sent successfully!';
+          contactForm.reset();
+          setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+          }, 2000);
+        }, 1000);
         return;
       }
 
+      // Check configured form provider (default to formsubmit if undefined)
+      const provider = (typeof CONFIG !== 'undefined' && CONFIG.FORM_PROVIDER)
+        ? CONFIG.FORM_PROVIDER.toLowerCase()
+        : 'formsubmit';
+
+      let fetchUrl = '';
+      let fetchBody = {};
+
+      if (provider === 'web3forms') {
+        const hasAccessKey = typeof CONFIG !== 'undefined' && CONFIG.WEB3FORMS_ACCESS_KEY && CONFIG.WEB3FORMS_ACCESS_KEY.trim() !== '';
+        if (!hasAccessKey) {
+          console.warn("Contact form set to web3forms, but no Access Key is configured in config.js.");
+          if (errorAlert) {
+            errorAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Form setup required: Please configure your Web3Forms Access Key in config.js.';
+            errorAlert.style.display = 'flex';
+          }
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
+          return;
+        }
+        fetchUrl = 'https://api.web3forms.com/submit';
+        fetchBody = {
+          access_key: CONFIG.WEB3FORMS_ACCESS_KEY,
+          name: name,
+          email: email,
+          subject: `Portfolio Contact: ${subjectText}`,
+          message: message,
+          from_name: name
+        };
+      } else {
+        // Fallback or default: FormSubmit
+        const hasEmail = typeof CONFIG !== 'undefined' && CONFIG.RECEIVING_EMAIL && CONFIG.RECEIVING_EMAIL.trim() !== '';
+        if (!hasEmail) {
+          console.warn("Contact form set to formsubmit, but no receiving email is configured in config.js.");
+          if (errorAlert) {
+            errorAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Form setup required: Please configure your email in config.js.';
+            errorAlert.style.display = 'flex';
+          }
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
+          return;
+        }
+        fetchUrl = `https://formsubmit.co/ajax/${CONFIG.RECEIVING_EMAIL}`;
+        fetchBody = {
+          name: name,
+          email: email,
+          subject: `Portfolio Contact: ${subjectText}`,
+          message: message,
+          _subject: `New Portfolio Message from ${name}`,
+          _captcha: "false" // Disable captcha verification page to optimize AJAX speed & stability
+        };
+      }
+
+      // Set up a 10-second timeout for the fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       try {
-        // Send to FormSubmit AJAX API
-        const response = await fetch(`https://formsubmit.co/ajax/${CONFIG.RECEIVING_EMAIL}`, {
+        const response = await fetch(fetchUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json"
           },
-          body: JSON.stringify({
-            name: name,
-            email: email,
-            subject: `Portfolio Contact: ${subjectText}`,
-            message: message,
-            _subject: `New Portfolio Message from ${name}` // Custom subject for FormSubmit
-          })
+          body: JSON.stringify(fetchBody),
+          signal: controller.signal
         });
+
+        // Clear the timeout if the request completed
+        clearTimeout(timeoutId);
 
         const data = await response.json();
         const success = response.ok || data.success === "true" || data.success === true;
@@ -249,18 +307,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (success) {
           // Success state
           submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Sent successfully!';
-          // Track successful contact form submission
           console.log("SUCCESS BLOCK EXECUTED");
 
           window.dataLayer = window.dataLayer || [];
-
           console.log("Before push:", window.dataLayer);
-
           window.dataLayer.push({
             event: "generate_lead",
             form_name: "Portfolio Contact Form"
           });
-
           console.log("After push:", window.dataLayer);
 
           // Show success message
@@ -296,18 +350,24 @@ document.addEventListener('DOMContentLoaded', () => {
           }, 4000);
 
         } else {
-          throw new Error("FormSubmit API responded with an error status.");
+          throw new Error("Form delivery API responded with an error status.");
         }
       } catch (err) {
+        // Clear the timeout in case of other errors
+        clearTimeout(timeoutId);
+
         console.error("Error submitting contact form:", err);
 
         // Error state
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;
 
-
         if (errorAlert) {
-          errorAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Failed to send. Please check your network or try again later.';
+          if (err.name === 'AbortError') {
+            errorAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Submission timed out. Please check your network or try again.';
+          } else {
+            errorAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Failed to send. Please check your network or try again later.';
+          }
           errorAlert.style.display = 'flex';
           errorAlert.style.opacity = '0';
           errorAlert.style.transform = 'translateY(10px)';
@@ -473,6 +533,23 @@ document.addEventListener('DOMContentLoaded', () => {
       cursorDot.style.opacity = '1';
       isVisible = true;
     });
-  }
-});
+    // ==========================================================================
+    // WHATSAPP CLICK TRACKING
+    // ==========================================================================
+
+    const whatsappLink = document.getElementById("whatsapp-link");
+
+    if (whatsappLink) {
+      whatsappLink.addEventListener("click", () => {
+
+        window.dataLayer = window.dataLayer || [];
+
+        window.dataLayer.push({
+          event: "whatsapp_click"
+        });
+
+        console.log("WhatsApp Click Tracked");
+      });
+    }
+  });
 
