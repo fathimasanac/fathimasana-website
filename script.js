@@ -537,10 +537,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // WHATSAPP CLICK TRACKING
     // ==========================================================================
 
-    const whatsappLink = document.getElementById("whatsapp-link");
+    document.querySelectorAll(".track-whatsapp").forEach(link => {
 
-    if (whatsappLink) {
-      whatsappLink.addEventListener("click", () => {
+      link.addEventListener("click", () => {
 
         window.dataLayer = window.dataLayer || [];
 
@@ -549,7 +548,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         console.log("WhatsApp Click Tracked");
+
       });
-    }
-  });
+
+    });
 
