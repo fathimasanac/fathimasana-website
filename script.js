@@ -746,3 +746,17 @@ document.querySelectorAll(".track-phone").forEach(link => {
     console.log("Phone Click Tracked");
   });
 });
+// ==========================================================================
+// LINKEDIN CLICK TRACKING
+// ==========================================================================
+
+document.querySelectorAll(".track-linkedin").forEach(link => {
+  link.addEventListener("click", () => {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "linkedin_click"
+    });
+
+    console.log("LinkedIn Click Tracked");
+  });
+});
