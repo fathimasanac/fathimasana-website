@@ -548,4 +548,181 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log("WhatsApp Click Tracked");
     });
   });
+
+  // ==========================================================================
+  // MAILTO LINK INTERCEPTOR & OPTIONS DIALOG
+  // ==========================================================================
+  const handleMailtoClick = (e) => {
+    const link = e.currentTarget;
+    const mailtoUrl = link.getAttribute('href');
+    if (!mailtoUrl || !mailtoUrl.startsWith('mailto:')) return;
+
+    e.preventDefault();
+    const emailAddress = mailtoUrl.replace(/^mailto:/i, '').split('?')[0];
+
+    // Create modal elements dynamically if they don't exist
+    let modalOverlay = document.getElementById('email-action-modal');
+    if (!modalOverlay) {
+      modalOverlay = document.createElement('div');
+      modalOverlay.id = 'email-action-modal';
+      modalOverlay.className = 'email-modal-overlay';
+      modalOverlay.innerHTML = `
+        <div class="email-modal-card">
+          <button class="email-modal-close-btn" aria-label="Close modal">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          <div class="email-modal-header">
+            <h3>How would you like to connect?</h3>
+            <div class="email-modal-address">
+              <i class="fa-solid fa-envelope"></i>
+              <span id="email-modal-address-text"></span>
+            </div>
+          </div>
+          <div class="email-modal-options">
+            <button class="email-modal-btn btn-copy" type="button">
+              <i class="fa-regular fa-copy"></i>
+              <span>Copy Email Address</span>
+            </button>
+            <button class="email-modal-btn btn-gmail" type="button">
+              <i class="fa-solid fa-square-envelope"></i>
+              <span>Open in Gmail (Web)</span>
+            </button>
+            <button class="email-modal-btn btn-outlook" type="button">
+              <i class="fa-solid fa-envelope-open-text"></i>
+              <span>Open in Outlook Web</span>
+            </button>
+            <button class="email-modal-btn btn-default-mail" type="button">
+              <i class="fa-solid fa-paper-plane"></i>
+              <span>Open Default Mail App</span>
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modalOverlay);
+
+      // Add event listeners to the modal once created
+      const closeBtn = modalOverlay.querySelector('.email-modal-close-btn');
+      closeBtn.addEventListener('click', closeEmailModal);
+      modalOverlay.addEventListener('click', (evt) => {
+        if (evt.target === modalOverlay) {
+          closeEmailModal();
+        }
+      });
+    }
+
+    // Set the email address in the modal
+    modalOverlay.querySelector('#email-modal-address-text').textContent = emailAddress;
+
+    // Set up button actions
+    const btnCopy = modalOverlay.querySelector('.btn-copy');
+    const btnGmail = modalOverlay.querySelector('.btn-gmail');
+    const btnOutlook = modalOverlay.querySelector('.btn-outlook');
+    const btnDefault = modalOverlay.querySelector('.btn-default-mail');
+
+    // Remove any previous event listeners by cloning the buttons
+    const newBtnCopy = btnCopy.cloneNode(true);
+    const newBtnGmail = btnGmail.cloneNode(true);
+    const newBtnOutlook = btnOutlook.cloneNode(true);
+    const newBtnDefault = btnDefault.cloneNode(true);
+
+    btnCopy.parentNode.replaceChild(newBtnCopy, btnCopy);
+    btnGmail.parentNode.replaceChild(newBtnGmail, btnGmail);
+    btnOutlook.parentNode.replaceChild(newBtnOutlook, btnOutlook);
+    btnDefault.parentNode.replaceChild(newBtnDefault, btnDefault);
+
+    // Add fresh event listeners
+    newBtnCopy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(emailAddress);
+        showCopySuccess(newBtnCopy);
+      } catch (err) {
+        // Fallback method
+        const textArea = document.createElement('textarea');
+        textArea.value = emailAddress;
+        textArea.style.position = 'fixed';
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          showCopySuccess(newBtnCopy);
+        } catch (copyErr) {
+          console.error('Failed to copy email address: ', copyErr);
+        }
+        document.body.removeChild(textArea);
+      }
+    });
+
+    newBtnGmail.addEventListener('click', () => {
+      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(emailAddress)}`;
+      window.open(gmailUrl, '_blank', 'noopener,noreferrer');
+      closeEmailModal();
+    });
+
+    newBtnOutlook.addEventListener('click', () => {
+      const outlookUrl = `https://outlook.live.com/default.aspx?rru=compose&to=${encodeURIComponent(emailAddress)}`;
+      window.open(outlookUrl, '_blank', 'noopener,noreferrer');
+      closeEmailModal();
+    });
+
+    newBtnDefault.addEventListener('click', () => {
+      window.location.href = mailtoUrl;
+      closeEmailModal();
+    });
+
+    // Show the modal
+    openEmailModal(modalOverlay);
+  };
+
+  const openEmailModal = (modal) => {
+    modal.style.display = 'flex';
+    // Trigger paint reflow for transition
+    void modal.offsetWidth;
+    modal.classList.add('visible');
+    document.body.style.overflow = 'hidden'; // Prevent main page scrolling
+  };
+
+  const closeEmailModal = () => {
+    const modal = document.getElementById('email-action-modal');
+    if (modal) {
+      modal.classList.remove('visible');
+      // Wait for transitions to finish
+      setTimeout(() => {
+        modal.style.display = 'none';
+        document.body.style.overflow = ''; // Restore page scrolling
+      }, 300);
+    }
+  };
+
+  const showCopySuccess = (btn) => {
+    const icon = btn.querySelector('i');
+    const text = btn.querySelector('span');
+
+    btn.classList.add('copied-success');
+    icon.className = 'fa-solid fa-circle-check';
+    text.textContent = 'Copied Email!';
+
+    setTimeout(() => {
+      btn.classList.remove('copied-success');
+      icon.className = 'fa-regular fa-copy';
+      text.textContent = 'Copy Email Address';
+    }, 2000);
+  };
+
+  // Bind key listeners for ESC key close
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeEmailModal();
+    }
+  });
+
+  // Attach event listener to all mailto links dynamically
+  const bindMailtoLinks = () => {
+    document.querySelectorAll('a[href^="mailto:"]').forEach(link => {
+      link.removeEventListener('click', handleMailtoClick);
+      link.addEventListener('click', handleMailtoClick);
+    });
+  };
+
+  bindMailtoLinks();
 });
