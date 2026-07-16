@@ -732,3 +732,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   bindMailtoLinks();
 });
+// ==========================================================================
+// PHONE CLICK TRACKING
+// ==========================================================================
+
+document.querySelectorAll(".track-phone").forEach(link => {
+  link.addEventListener("click", () => {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "phone_click"
+    });
+
+    console.log("Phone Click Tracked");
+  });
+});
