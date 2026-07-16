@@ -334,20 +334,28 @@ img {
   font-family: var(--font-pop);
   font-size: 3.6rem;
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.25;
   color: var(--color-dark);
-  margin-bottom: 16px;
-  text-transform: lowercase;
+  margin-bottom: 24px;
 }
 
 .highlight-pop {
   display: inline-block;
   color: var(--color-terracotta);
-  padding: 0;
-  border-radius: 0;
-  box-shadow: none;
-  transform: none;
-  transition: none;
+  background-color: rgba(200, 90, 50, 0.06);
+  padding: 4px 16px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid rgba(200, 90, 50, 0.25);
+  transform: rotate(-1deg);
+  box-shadow: 4px 4px 0px rgba(200, 90, 50, 0.1);
+  margin-top: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.highlight-pop:hover {
+  transform: rotate(-2deg) scale(1.02);
+  box-shadow: 6px 6px 0px rgba(200, 90, 50, 0.15);
+  background-color: rgba(200, 90, 50, 0.09);
 }
 
 .hero-subtitle {
@@ -356,7 +364,7 @@ img {
   font-weight: 600;
   color: var(--color-slate-blue);
   margin-bottom: 24px;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .hero-description {
@@ -661,7 +669,7 @@ img {
   display: inline-block;
   position: relative;
   letter-spacing: -0.5px;
-  text-transform: lowercase;
+  text-transform: none;
 }
 
 /* Subheading underlines removed per design request */
@@ -1195,7 +1203,7 @@ img {
   color: #FFFFFF;
   line-height: 1.15;
   margin-bottom: 16px;
-  text-transform: lowercase;
+  text-transform: none;
 }
 
 .contact-subtext {
