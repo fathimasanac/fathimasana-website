@@ -556,7 +556,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const link = e.currentTarget;
     const mailtoUrl = link.getAttribute('href');
     if (!mailtoUrl || !mailtoUrl.startsWith('mailto:')) return;
+    // Google Tag Manager - Email Click Tracking
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "email_click"
+    });
 
+    console.log("Email Click Tracked");
     e.preventDefault();
     const emailAddress = mailtoUrl.replace(/^mailto:/i, '').split('?')[0];
 
